@@ -23,8 +23,11 @@ RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add
     && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 --no-install-recommends
 
 # gog 설치
-RUN wget -qO - https://github.com/steipete/gogcli/releases/download/v0.9.0/gogcli_0.9.0_linux_amd64.tar.gz | tar -xzC /tmp - && \
-    mv /tmp/gog /usr/local/bin/gog && \
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates \
+  && rm -rf /var/lib/apt/lists/* \
+  && curl -fL https://github.com/steipete/gogcli/releases/download/v0.9.0/gogcli_0.9.0_linux_amd64.tar.gz \
+  | tar -xzC /tmp \
+  mv /tmp/gog /usr/local/bin/gog && \
     chmod +x /usr/local/bin/gog
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
