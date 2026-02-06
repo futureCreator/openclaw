@@ -5,8 +5,8 @@ services:
     plan: standard
     healthCheckPath: /health
     envVars:
-      - key: PORT
-        value: "8080"
+      - key: OPENCLAW_GATEWAY_PORT
+        value: "10000"
       - key: SETUP_PASSWORD
         sync: false
       - key: OPENCLAW_STATE_DIR
