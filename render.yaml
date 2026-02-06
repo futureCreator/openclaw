@@ -4,6 +4,7 @@ services:
     runtime: docker
     plan: standard
     healthCheckPath: /health
+    dockerCommand: "node dist/index.js gateway --allow-unconfigured --bind lan"
     envVars:
       - key: OPENCLAW_GATEWAY_PORT
         value: "10000"
