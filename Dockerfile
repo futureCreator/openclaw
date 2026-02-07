@@ -35,11 +35,8 @@ RUN curl -sLo /tmp/himalaya.tgz \
     mv /tmp/gog /usr/local/bin/gog && \
     chmod +x /usr/local/bin/gog
 
-# Global bun packages (symlink to /usr/local/bin so node user can access)
-RUN bun add -g clawhub @steipete/bird mcporter && \
-    ln -s /root/.bun/bin/clawhub /usr/local/bin/clawhub && \
-    ln -s /root/.bun/bin/bird /usr/local/bin/bird && \
-    ln -s /root/.bun/bin/mcporter /usr/local/bin/mcporter
+# npm
+RUN npm i -g clawhub @steipete/bird mcporter
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY ui/package.json ./ui/package.json
