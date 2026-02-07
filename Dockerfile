@@ -1,31 +1,42 @@
 FROM node:22-bookworm
 
-# Install Bun (required for build scripts)
-RUN curl -fsSL https://bun.sh/install | bash
+# Install Bun (required for build scripts + global packages)
+RUN curl -fsSL https://bun.sh/install | bash && \
+    ln -s /root/.bun/bin/bun /usr/local/bin/bun && \
+    ln -s /root/.bun/bin/bunx /usr/local/bin/bunx
 ENV PATH="/root/.bun/bin:${PATH}"
 
 RUN corepack enable
 
 WORKDIR /app
 
+# System packages: Chrome, fonts, jq, ripgrep + optional extras (single layer)
 ARG OPENCLAW_DOCKER_APT_PACKAGES=""
-RUN if [ -n "$OPENCLAW_DOCKER_APT_PACKAGES" ]; then \
-      apt-get update && \
-      DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $OPENCLAW_DOCKER_APT_PACKAGES && \
-      apt-get clean && \
-      rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*; \
-    fi
+RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub \
+      | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg && \
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
+      > /etc/apt/sources.list.d/google-chrome.list && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      google-chrome-stable \
+      fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf \
+      libxss1 jq ripgrep $OPENCLAW_DOCKER_APT_PACKAGES && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
-# chrome 설치
-RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list \
-    && apt-get update \
-    && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 --no-install-recommends
-
-# gog 설치
-RUN wget -qO - https://github.com/steipete/gogcli/releases/download/v0.9.0/gogcli_0.9.0_linux_amd64.tar.gz | tar -xzC /tmp && \
+# External CLI tools (himalaya, gog)
+RUN curl -sLo /tmp/himalaya.tgz \
+      "https://github.com/pimalaya/himalaya/releases/latest/download/himalaya.x86_64-linux.tgz" && \
+    tar -xzf /tmp/himalaya.tgz -C /usr/local/bin/ && \
+    rm /tmp/himalaya.tgz && \
+    chmod +x /usr/local/bin/himalaya && \
+    wget -qO - https://github.com/steipete/gogcli/releases/download/v0.9.0/gogcli_0.9.0_linux_amd64.tar.gz \
+      | tar -xzC /tmp && \
     mv /tmp/gog /usr/local/bin/gog && \
     chmod +x /usr/local/bin/gog
+
+# Global bun packages
+RUN bun add -g clawdhub @steipete/bird mcporter
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY ui/package.json ./ui/package.json
