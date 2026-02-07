@@ -16,6 +16,10 @@ services:
         value: /data/workspace
       - key: OPENCLAW_GATEWAY_TOKEN
         sync: false
+      - key: OPENCLAW_PRELAUNCH_CHROME
+        value: "1"
+      - key: OPENCLAW_BROWSER_CDP_PORT
+        value: "10011"
     disk:
       name: openclaw-data
       mountPath: /data
