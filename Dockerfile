@@ -36,7 +36,7 @@ RUN curl -sLo /tmp/himalaya.tgz \
     chmod +x /usr/local/bin/gog
 
 # Global bun packages
-RUN bun add -g clawdhub @steipete/bird mcporter
+RUN bun add -g clawhub @steipete/bird mcporter
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY ui/package.json ./ui/package.json
